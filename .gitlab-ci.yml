@@ -36,12 +36,10 @@ check:
 build:trigger:
   stage: build
   rules:
-    - if: "$BUILD"
-      when: always
+    - if: '$BUILD == "true" && $CI_PIPELINE_SOURCE == "trigger"'
     - when: never
   variables:
     VERSION: $VERSION
-    BUILD: $BUILD
   trigger:
     include: Alpine/.gitlab-ci.yml
     strategy: depend

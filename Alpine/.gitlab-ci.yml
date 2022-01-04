@@ -4,7 +4,7 @@
 
 workflow:
   rules:
-    - if: "$BUILD"
+    - if: "$VERSION"
       when: always
     - when: never
 
