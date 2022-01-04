@@ -12,7 +12,9 @@ build:
   image: registry.gitlab.com/jitesoft/dockerfiles/node-base/full:16
   variables:
     GIT_STRATEGY: none
+    PKG_CACHE_PATH: ${CI_PROJECT_DIR}/pkg_cache
   script:
+    - mkdir ${CI_PROJECT_DIR}/pkg_cache
     - git clone https://github.com/bitwarden/cli.git .
     - git checkout ${VERSION}
     - npm ci
@@ -22,6 +24,10 @@ build:
     - mkdir artifacts
     - mv dist/linux/bw-arm64 artifacts/bw-arm64
     - mv dist/linux/bw-x64 artifacts/bw-amd64
+  cache:
+    key: pkg-node.cache
+    paths:
+      - pkg_cache
   artifacts:
     when: on_success
     expire_in: 1 day
