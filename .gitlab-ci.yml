@@ -3,10 +3,12 @@ include:
     project: jitesoft/gitlab-ci-lib
 
 stages:
+  - check
   - build
+  - post
 
 check:
-  stage: .pre
+  stage: check
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: always
@@ -45,7 +47,7 @@ build:trigger:
     strategy: depend
 
 create-cache:
-  stage: .post
+  stage: post
   script:
     - echo "${VERSION}" > version.txt
   cache:
@@ -58,7 +60,7 @@ create-cache:
     - when: never
 
 scan:
-  stage: .post
+  stage: post
   extends: .container_scanning
   rules:
     - if: "$SCAN"
