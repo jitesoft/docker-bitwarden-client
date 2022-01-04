@@ -14,9 +14,9 @@ build:
     GIT_STRATEGY: none
     PKG_CACHE_PATH: ${CI_PROJECT_DIR}/pkg_cache
   script:
-    - mkdir ${CI_PROJECT_DIR}/pkg_cache
     - git clone https://github.com/bitwarden/cli.git .
     - git checkout ${VERSION}
+    - mkdir ${CI_PROJECT_DIR}/pkg_cache || echo "Cache dir already exist."
     - npm ci
     - npm run sub:init
     - npm run build:prod
