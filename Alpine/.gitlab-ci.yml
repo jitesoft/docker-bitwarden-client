@@ -1,3 +1,7 @@
+include:
+  - file: /OCI/sign.yml
+    project: jitesoft/gitlab-ci-lib
+
 workflow:
   rules:
     - if: "$BUILD"
