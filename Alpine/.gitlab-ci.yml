@@ -36,9 +36,9 @@ containerize:
     - job: build
       artifacts: true
   script:
-    - mv entrypoint artifacts/entrypoint
+    - mv Alpine/entrypoint artifacts/entrypoint
     - TAG_LIST=$(helper "${CI_REGISTRY_IMAGE}", "${VERSION},latest")
-    - docker buildx build --platform linux/arm64,linux/amd64 --progress plain --push ${TAG_LIST} --build-arg VERSION=${VERSION} .
+    - docker buildx build --platform linux/arm64,linux/amd64 --progress plain --push ${TAG_LIST} --build-arg VERSION=${VERSION} -f Alpine/Dockerfile .
   rules:
     - when: on_success
   tags: [ protected, buildx ]
