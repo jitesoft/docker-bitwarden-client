@@ -13,8 +13,8 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 ARG TARGETARCH
 
 RUN --mount=type=bind,source=./artifacts,target=/tmp/artifacts \
-    mv /tmp/artifacts/bw-${TARGETARCH} /usr/local/bin/bw \
- && mv /tmp/artifacts/entrypoint /usr/local/bin/entrypoint \
+    cp /tmp/artifacts/bw-${TARGETARCH}  /usr/local/bin/bw \
+ && cp /tmp/artifacts/entrypoint /usr/local/bin/entrypoint \
  && chmod +x /usr/local/bin/bw \
  && chmod +x /usr/local/bin/entrypoint \
  && addgroup -g 1000 bitwarden \
