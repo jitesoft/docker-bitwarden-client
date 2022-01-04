@@ -1,12 +1,11 @@
-#include:
-#  - file: /OCI/sign.yml
-#    project: jitesoft/gitlab-ci-lib
+include:
+  - file: /OCI/sign.yml
+    project: jitesoft/gitlab-ci-lib
 
 stages:
   - build
   - containerize
-
-#  - sign
+  - sign
 
 build:
   stage: build
@@ -43,13 +42,13 @@ containerize:
     - when: on_success
   tags: [ protected, buildx ]
 
-#sign:
-#  extends: .sign
-#  tags: [ jitesoft, protected, buildx ]
-#  stage: sign
-#  variables:
-#    COSIGN_ANNOTATIONS: "-a sig=jitesoft-bot"
-#    SIGN_TAGS: "${VERSION},latest"
-#    SIGN_IMAGES: "jitesoft/bitwarden-client,${CI_REGISTRY_IMAGE},ghcr.io/jitesoft/bitwarden-client"
-#  rules:
-#    - when: on_success
+sign:
+  extends: .sign
+  tags: [ jitesoft, protected, buildx ]
+  stage: sign
+  variables:
+    COSIGN_ANNOTATIONS: "-a sig=jitesoft-bot"
+    SIGN_TAGS: "${VERSION},latest"
+    SIGN_IMAGES: "jitesoft/bitwarden-client,${CI_REGISTRY_IMAGE},ghcr.io/jitesoft/bitwarden-client"
+  rules:
+    - when: on_success

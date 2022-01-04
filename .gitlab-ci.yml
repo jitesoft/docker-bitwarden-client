@@ -70,5 +70,3 @@ scan:
   variables:
     GIT_STRATEGY: none
     SCANNING_IMAGE_NAME: "${CI_REGISTRY_IMAGE}:${VERSION}"
-
-
