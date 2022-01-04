@@ -36,7 +36,7 @@ containerize:
       artifacts: true
   script:
     - mv Alpine/entrypoint artifacts/entrypoint
-    - TAG_LIST=$(helper "${CI_REGISTRY_IMAGE}", "${VERSION},latest")
+    - TAG_LIST=$(helper "${CI_REGISTRY_IMAGE},jitesoft/bitwarden-client,ghcr.io/jitesoft/bitwarden-client", "${VERSION},latest")
     - docker buildx build --platform linux/arm64,linux/amd64 --progress plain --push ${TAG_LIST} --build-arg VERSION=${VERSION} -f Alpine/Dockerfile .
   rules:
     - when: on_success
