@@ -36,7 +36,8 @@ check:
 build:trigger:
   stage: build
   rules:
-    - if: '$BUILD == "true" && $CI_PIPELINE_SOURCE == "trigger"'
+    - if: "$BUILD"
+      when: always
     - when: never
   variables:
     VERSION: $VERSION

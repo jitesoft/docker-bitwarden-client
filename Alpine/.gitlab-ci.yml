@@ -2,12 +2,6 @@
 #  - file: /OCI/sign.yml
 #    project: jitesoft/gitlab-ci-lib
 
-workflow:
-  rules:
-    - if: "$VERSION"
-      when: always
-    - when: never
-
 stages:
   - build
   - containerize
@@ -47,6 +41,7 @@ containerize:
     - docker buildx build --platform linux/arm64,linux/amd64 --progress plain --push ${TAG_LIST} --build-arg VERSION=${VERSION} .
   rules:
     - when: on_success
+  tags: [ protected, buildx ]
 
 #sign:
 #  extends: .sign
