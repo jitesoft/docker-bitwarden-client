@@ -1,0 +1,56 @@
+workflow:
+  rules:
+    - if: "$BUILD"
+      when: always
+    - when: never
+
+stages:
+  - build
+  - containerize
+
+#  - sign
+
+build:
+  stage: build
+  image: registry.gitlab.com/jitesoft/dockerfiles/node-base/full:16
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - git clone https://github.com/bitwarden/cli.git .
+    - git checkout ${VERSION}
+    - npm ci
+    - npm run sub:init
+    - npm run build:prod
+    - ./node_modules/.bin/pkg . --targets alpine-x64,alpine-arm64 --output ./dist/linux/bw
+    - mkdir artifacts
+    - mv dist/linux/bw-arm64 artifacts/bw-arm64
+    - mv dist/linux/bw-x64 artifacts/bw-amd64
+  artifacts:
+    when: on_success
+    expire_in: 1 day
+    paths:
+      - artifacts/
+
+containerize:
+  stage: containerize
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
+  needs:
+    - job: build
+      artifacts: true
+  script:
+    - mv entrypoint artifacts/entrypoint
+    - TAG_LIST=$(helper "${CI_REGISTRY_IMAGE}", "${VERSION},latest")
+    - docker buildx build --platform linux/arm64,linux/amd64 --progress plain --push ${TAG_LIST} --build-arg VERSION=${VERSION} .
+  rules:
+    - when: on_success
+
+.sign:
+  extends: .sign
+  tags: [ jitesoft, protected, buildx ]
+  stage: sign
+  variables:
+    COSIGN_ANNOTATIONS: "-a sig=jitesoft-bot"
+    SIGN_TAGS: "${VERSION},latest"
+    SIGN_IMAGES: "jitesoft/bitwarden-client,${CI_REGISTRY_IMAGE},ghcr.io/jitesoft/bitwarden-client"
+  rules:
+    - when: on_success

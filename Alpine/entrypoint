@@ -1,0 +1,15 @@
+#!/usr/bin/env ash
+set -e
+
+# In case autologin is set, the script will try log the user in,
+# if it's set and the required variables are not set (such as password or api keys)
+# the script will exit on login.
+if [ "${AUTO_LOGIN}" == "true" ]; then
+  bw login
+  # Not possible to unlock without being logged in!
+  if [ "${AUTO_UNLOCK}" == "true" ]; then
+    bw unlock
+  fi
+fi
+
+exec "$@"

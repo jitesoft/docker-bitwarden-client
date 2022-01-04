@@ -1,0 +1,69 @@
+stages:
+  - build
+
+check:
+  stage: .pre
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+    - when: never
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
+  script:
+    - touch version.txt
+    - REMOTE_VERSION=$(wget -qO- https://api.github.com/repos/bitwarden/cli/releases | jq -r ".[0].tag_name")
+    - LOCAL_VERSION=$(cat version.txt)
+    - |
+      if [ ! -z "${FORCE_BUILD+x}" ] || [ "${REMOTE_VERSION}" != "${LOCAL_VERSION}" ]; then
+        echo "${REMOTE_VERSION} and ${LOCAL_VERSION} differ. Running build."
+        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${REMOTE_VERSION}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
+      else
+        echo "${REMOTE_VERSION} and ${LOCAL_VERSION} where equal. Running scan."
+        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${REMOTE_VERSION}" -F "variables[SCAN]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
+      fi
+  cache:
+    paths:
+      - version.txt
+    policy: pull
+
+build:trigger:
+  stage: build
+  rules:
+    - if: "$BUILD"
+      when: always
+    - when: never
+  variables:
+    VERSION: $VERSION
+    BUILD: $BUILD
+  trigger:
+    include: Alpine/.gitlab-ci.yml
+    strategy: depend
+
+create-cache:
+  stage: .post
+  script:
+    - echo "${VERSION}" > version.txt
+  cache:
+    paths:
+      - version.txt
+    policy: push
+  rules:
+    - if: "$BUILD"
+      when: on_success
+    - when: never
+
+scan:
+  stage: .post
+  extends: .container_scanning
+  rules:
+    - if: "$SCAN"
+      when: always
+    - if: "$BUILD"
+      when: on_success
+    - when: never
+  variables:
+    GIT_STRATEGY: none
+    SCANNING_IMAGE_NAME: "${CI_REGISTRY_IMAGE}:${VERSION}"
+
+
